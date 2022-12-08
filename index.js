@@ -160,4 +160,4 @@ distube
 		channel.send(`An error encoutered: ${error.slice(0, 1979)}`); // Discord limits 2000 characters in a message
 	});
 
-client.login('ODk3MTY5NDU0MDQ2MjYxMjg5.G6F53f.FBTDTBpUlvdciTr8DU51RCSZ4D9uyxSUgwuO7U');
+client.login(process.env.TOKEN);
