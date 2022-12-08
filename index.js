@@ -29,6 +29,11 @@ client.on('ready', client => {
 // client.on("debug", console.log)
 
 client.on('messageCreate', message => {
+
+	if(cmd === 'ping'){
+		message.channel.send(`🏓 Latency is ${Date.now() - message.createdTimestamp}ms. API Latency is ${Math.round(client.ws.ping)}ms`);
+	}
+
 	if (message.author.bot || !message.inGuild()) return;
 	if (!message.content.startsWith(prefix)) return;
 	const args = message.content
@@ -40,9 +45,7 @@ client.on('messageCreate', message => {
 	channel = message.channel;
 	author = message.author;
 
-	if(cmd === 'ching'){
-		message.channel.send("Ching Chong!");
-	}
+
 
 	if (cmd === 'play' || cmd === 'p') {
 		const voiceChannel = message.member?.voice?.channel;
