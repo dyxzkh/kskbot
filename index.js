@@ -63,6 +63,13 @@ client.on('messageCreate', message => {
 	}
 
 	if (cmd === "repeat" || cmd === "rp" || cmd === "loop") {
+
+		if(args[0] === "" || args[0] === null) {
+			return message.channel.send(
+				'>>> សូមបញ្ជូល Argument in Command (on,off,queue)! , Ex: .repeat on'
+			);
+		}
+
 		if(args[0].toString() === "on"){
 			distube.setRepeatMode(message, 1)
 			message.reply("រង្វិលជុំត្រូវបានបើកនៅលើបទនេះ! 🔂");
@@ -133,7 +140,7 @@ distube
 		.setDescription(`[${song.name}]`)
 		.setImage(song.thumbnail)
 		.setTimestamp()
-		.addFields({ name: 'រយៈពេល ៈ', value: song.formattedDuration.toString(), inline: true })
+		.addFields({ name: 'រយៈពេល ៖', value: song.formattedDuration.toString(), inline: true })
 		.setFooter({ text: `Request By 🔸 ${author.username} 🔸`, iconURL: author.displayAvatarURL({ dynamic: true })});
 		channel.send({ embeds: [playembed] });
 	}).on("addSong", (queue, song) => {
@@ -143,7 +150,7 @@ distube
 		.setDescription(`[${song.name}]`)
 		.setImage(song.thumbnail)
 		.setTimestamp()
-		.addFields({ name: 'រយៈពេល ៈ', value: song.formattedDuration.toString()})
+		.addFields({ name: 'រយៈពេល ៖', value: song.formattedDuration.toString()})
 		.setFooter({ text: `Request By 🔹 ${author.username} 🔹`, iconURL: author.displayAvatarURL({ dynamic: true })});
 		channel.send({ embeds: [playembed] });
 	}).on('finish', () => {
@@ -153,4 +160,4 @@ distube
 		channel.send(`An error encoutered: ${error.slice(0, 1979)}`); // Discord limits 2000 characters in a message
 	});
 
-client.login(process.env.TOKEN);
+client.login('ODk3MTY5NDU0MDQ2MjYxMjg5.G6F53f.FBTDTBpUlvdciTr8DU51RCSZ4D9uyxSUgwuO7U');
