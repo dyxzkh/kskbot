@@ -3,6 +3,7 @@ const { DisTube } = require('distube');
 const {prefix} = require("./config.json");
 require('dotenv').config();
 const client = new Discord.Client({
+	setMaxListeners: 0,
 	intents: ['MessageContent','Guilds', 'GuildVoiceStates', 'GuildMessages'],
 });
 
@@ -48,7 +49,7 @@ client.on('messageCreate', message => {
 		if (voiceChannel) {
 			if(args.join(' ') === ""){
 				message.channel.send(
-					'>>> សូមបញ្ជូលឈ្មោះចម្រៀងឬលីងក្នុង cmd!😑',
+					'>>> សូមបញ្ជូលឈ្មោះចម្រៀងឬលីងក្នុង Command!😑',
 				);
 				return;
 			}
@@ -123,6 +124,7 @@ client.on('messageCreate', message => {
 	}
 });
 
+
 distube
 	.on("playSong", (queue,song) => {
 		let playembed = new Discord.EmbedBuilder()
@@ -146,6 +148,9 @@ distube
 		channel.send({ embeds: [playembed] });
 	}).on('finish', () => {
 		channel.send('អស់ចម្រៀងនៅក្នុងបញ្ចី! 👏🏻');
-	})
+	}).on('error', (error) => {
+		console.error(error);
+		channel.send(`An error encoutered: ${error.slice(0, 1979)}`); // Discord limits 2000 characters in a message
+	});
 
 client.login(process.env.TOKEN);
