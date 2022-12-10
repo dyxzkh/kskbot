@@ -1,11 +1,13 @@
 const Discord = require('discord.js');
-const { DisTube } = require('distube');
+const { DisTube, SearchResultType, Song } = require('distube');
 const {prefix} = require("./config.json");
 require('dotenv').config();
 const client = new Discord.Client({
 	setMaxListeners: 0,
 	intents: ['MessageContent','Guilds', 'GuildVoiceStates', 'GuildMessages'],
 });
+
+client.setMaxListeners(0);
 
 let channel;
 let author;
@@ -65,92 +67,117 @@ client.on('messageCreate', message => {
 		}
 	}
 
-	if (cmd === "repeat" || cmd === "rp" || cmd === "loop") {
-
-		if(args.join(' ') === "") {
-			return message.channel.send(
-				'>>> សូមបញ្ជូល Argument in Command (on,off,queue)! , Ex: .repeat on'
-			);
-		}
-
-		if(args[0].toString() === "on"){
-			distube.setRepeatMode(message, 1)
-			message.reply("រង្វិលជុំត្រូវបានបើកនៅលើបទនេះ! 🔂");
-		}else if (args[0].toString() === "off"){
-			distube.setRepeatMode(message, 0)
-			message.reply("រង្វិលជុំត្រូវបានបិទ! 📴");
-		}else if (args[0].toString() === "queue" || args[0].toString() === "q"){
-			distube.setRepeatMode(message, 2)
-			message.reply("រង្វិលជុំត្រូវបានបើកនៅលើបញ្ជីទាំងមូល! 🔁");
-		}
-	}
-
 	if(queue){
+		
+		if (cmd === "repeat" || cmd === "rp" || cmd === "loop") {
+			const voiceChannel = message.member?.voice?.channel;
+			if (!voiceChannel) return;
+
+			if(args.join(' ') === "") {
+				return message.channel.send(
+					'>>> សូមបញ្ជូល Argument in Command (on,off,queue)! , Ex: .repeat on'
+				);
+			}
+
+			if(args[0].toString() === "on"){
+				distube.setRepeatMode(message, 1)
+				message.reply("រង្វិលជុំត្រូវបានបើកនៅលើបទនេះ! 🔂");
+			}else if (args[0].toString() === "off"){
+				distube.setRepeatMode(message, 0)
+				message.reply("រង្វិលជុំត្រូវបានបិទ! 📴");
+			}else if (args[0].toString() === "queue" || args[0].toString() === "q"){
+				distube.setRepeatMode(message, 2)
+				message.reply("រង្វិលជុំត្រូវបានបើកនៅលើបញ្ជីទាំងមូល! 🔁");
+			}
+		}
+
 
 		if (cmd === 'stop' || cmd === 's') {
+			const voiceChannel = message.member?.voice?.channel;
+			if (!voiceChannel) return;
 			distube.stop(message);
 			message.channel.send('ចម្រៀងត្រូវបានបញ្ឈប់! 😵‍💫');
 		}
 
 		if (cmd === 'leave' || cmd === 'l') {
+			const voiceChannel = message.member?.voice?.channel;
+			if (!voiceChannel) return;
 			distube.voices.get(message)?.leave();
 			message.channel.send('បានចាកចេញ, ជួប​គ្នា​ពេល​ក្រោយ! 😘');
 		}
 
 		if (cmd === 'resume' || cmd === 'rs') {
+			const voiceChannel = message.member?.voice?.channel;
+			if (!voiceChannel) return;
 			distube.resume(message);
 			message.reply("ចម្រៀងបានចាក់បន្ត! ▶️");
 		}
 
 		if (cmd === 'pause' || cmd === 'ps') {
+			const voiceChannel = message.member?.voice?.channel;
+			if (!voiceChannel) return;
 			distube.pause(message);
 			message.reply("ចម្រៀងបានស្កុប! ⏹️");
 		}
 
-		if (cmd === 'skip' || cmd === 'n' || cmd === 'next') {
-			
+		if (cmd === 'n' || cmd === 'next') {
+			const voiceChannel = message.member?.voice?.channel;
+			if (!voiceChannel) return;
+
 			if(queue.songs.length > 1){
 				distube.skip(message);
 			}else{
-				message.reply('អត់មានចម្រៀងក្នុងបញ្ជី! 😕');
+				message.reply('អត់មានចម្រៀងបន្ទាប់ទេ! 😕');
+			}
+		}
+
+		if (cmd === 'previous' || cmd === 'pv') {
+			const voiceChannel = message.member?.voice?.channel;
+			if (!voiceChannel) return;
+			if(queue.previousSongs.length > 0){
+				distube.previous(message);
+				message.reply('បានចាក់ចម្រៀងមុននេះ! 🥲');
+			}else{
+				message.reply('អត់មានចម្រៀងមុននឹងចម្រៀងនេះទេ! 😕');
 			}
 		}
 
 		if (cmd === 'seek' || cmd === 'sk') {
-			
+
+		const voiceChannel = message.member?.voice?.channel;
+		if (!voiceChannel) return;
 
 			if(args.join(' ') === ""){
 				distube.seek(message, 10);
 				return message.reply("ចម្រៀងបានខាទៅវិនាទី ទី 10 នៃចម្រៀង! ➿");
-				
 			}
 
 			const time = Number(args[0])
 			if (isNaN(time)) return message.reply("សូមដាក់វិនាទីដែលត្រូវខាអោយបានត្រឹមត្រូវ! 😕");
 			distube.seek(message, time);
-			message.reply("ចម្រៀងបានខាទៅវិនាទី ទី " + time + "! ➿");
-
+			return message.reply("ចម្រៀងបានខាទៅវិនាទី ទី " + time + "! ➿");
 		}
 
 		if (cmd === 'forward' || cmd === 'fw') {
-			
+			const voiceChannel = message.member?.voice?.channel;
+			if (!voiceChannel) return;
 
 			if(args.join(' ') === ""){
 				distube.seek(message, (queue.currentTime + 10));
 				return message.reply("ចម្រៀងបានខាទៅមុខ 10 វិនាទី! ⏩");
-				
 			}
 
 			const time = Number(args[0])
 			if (isNaN(time)) return message.reply("សូមដាក់វិនាទីដែលត្រូវខាអោយបានត្រឹមត្រូវ! 😕");
 			distube.seek(message, queue.currentTime + time);
-			message.reply("ចម្រៀងបានខាទៅមុខ "+ parseInt(args[0]) +" វិនាទី! ⏩");
-
+			return message.reply("ចម្រៀងបានខាទៅមុខ "+ parseInt(args[0]) +" វិនាទី! ⏩");
 		}
 
 		if (cmd === 'rewind' || cmd === 'rw') {
 			
-			
+			const voiceChannel = message.member?.voice?.channel;
+			if (!voiceChannel) return;
+
 			const time = Number(args[0])
 			if (isNaN(time)) return message.reply("សូមដាក់វិនាទីដែលត្រូវខាអោយបានត្រឹមត្រូវ! 😕");
 
@@ -161,6 +188,7 @@ client.on('messageCreate', message => {
 				distube.seek(message, queue.currentTime - time);
 				message.reply("ចម្រៀងបានខាទៅក្រោយ "+ parseInt(args[0]) +" វិនាទី! ⏪");
 			}
+			return;
 		}
 
 		if (cmd === 'volume' || cmd === 'vol') {
@@ -169,28 +197,33 @@ client.on('messageCreate', message => {
 			// 	message.reply("សំឡេង = " + queue.getVol)
 				
 			// }
+			const voiceChannel = message.member?.voice?.channel;
+			if (!voiceChannel) return;
 
 			const vol = Number(args[0])
 			if (isNaN(vol)) return message.reply("សូមដាក់ចំនួនសំឡេងអោយបានត្រឹមត្រូវ! 😕");
 
 			if(vol >= 0){
 				queue.setVolume(vol);
-				message.reply("សំឡេងបានដាក់ទៅចំនួន " + vol + "%");
+				return message.reply("សំឡេងបានដាក់ទៅចំនួន " + vol + "%");
 			}else{
 				return message.reply("សូមដាក់ចំនួនសំឡេងអោយបានត្រឹមត្រូវ! 😕");
 			}
 		}
 
 		if (cmd === 'queue' || cmd === 'q') {
+
+			const voiceChannel = message.member?.voice?.channel;
+			if (!voiceChannel) return;
 			
 			if (!queue) {
-				message.channel.send('អត់មានអីចាក់ទេ! 😕');
+				return message.channel.send('អត់មានអីចាក់ទេ! 😕');
 			} else {
-				message.channel.send(
+				return message.channel.send(
 					`បទក្នុងបញ្ជី:\n${queue.songs
 						.map(
 							(song, id) =>
-								`**${id ? id : '🔊 កំពុងចាក់'}**. ${
+								`**${id ? id : '🔊 កំពុងចាក់'}**. - ${
 									song.name
 								} - \`${song.formattedDuration}\``,
 						)
@@ -199,6 +232,20 @@ client.on('messageCreate', message => {
 				);
 			}
 		}
+
+		if(cmd === 'shuffle' || cmd === 'sf'){
+			const voiceChannel = message.member?.voice?.channel;
+			if (!voiceChannel) return;
+			distube.shuffle(message);
+			return message.channel.send(`ចម្រៀងចំនួន ${queue.songs.length} ត្រូវបាន Shuffle`);
+		}
+
+		// if (cmd === 'remove' || cmd === 'rm'){
+		// 	const voiceChannel = message.member?.voice?.channel;
+		// 	if (!voiceChannel) return;
+		// 	const num = Number(args[0])
+		// 	if (isNaN(num)) return message.reply("សូមដាក់លេខអោយបានត្រឹមត្រូវ! 😕");
+		// }
 	}
 });
 
